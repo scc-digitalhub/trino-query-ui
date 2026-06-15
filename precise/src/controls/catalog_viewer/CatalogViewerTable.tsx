@@ -9,6 +9,7 @@ import SchemaProvider from '../../sql/SchemaProvider'
 import TableReference from '../../schema/TableReference'
 import CatalogViewerColumn from './CatalogViewerColumn'
 import { buildPath } from './ViewerState'
+import { useTrinoTokens } from '../../theme/useTrinoTokens'
 
 interface CatalogViewerTableProps {
     tableRef: TableReference
@@ -28,6 +29,7 @@ const CatalogViewerTable: React.FC<CatalogViewerTableProps> = ({
     isLoading,
     onGenerateQuery,
 }) => {
+    const tokens = useTrinoTokens()
     const [table, setTable] = useState<Table>(() => new Table(tableRef.tableName))
 
     const [isLoadingColumns, setIsLoadingColumns] = useState(false)
@@ -89,7 +91,7 @@ const CatalogViewerTable: React.FC<CatalogViewerTableProps> = ({
                         onClick={handleGenerateQuery}
                         disabled={isLoading}
                     >
-                        <SearchOutlinedIcon sx={{ fontSize: 14 }} />
+                        <SearchOutlinedIcon sx={{ fontSize: tokens.fontSizeCatalogTreeIcon }} />
                     </IconButton>
                 </Box>
             }

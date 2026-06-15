@@ -4,6 +4,7 @@ import { TreeItem } from '@mui/x-tree-view'
 import Column from '../../schema/Column'
 import TableReference from './../../schema/TableReference'
 import { buildPath } from './ViewerState'
+import { useTrinoTokens } from '../../theme/useTrinoTokens'
 
 interface CatalogViewerColumnProps {
     tableRef: TableReference
@@ -12,6 +13,7 @@ interface CatalogViewerColumnProps {
 }
 
 const CatalogViewerColumn: React.FC<CatalogViewerColumnProps> = ({ tableRef, column, isVisible }) => {
+    const tokens = useTrinoTokens()
     const columnPath = buildPath.column(tableRef.catalogName, tableRef.schemaName, tableRef.tableName, column.getName())
 
     // Check visibility using the passed down helper
@@ -39,7 +41,7 @@ const CatalogViewerColumn: React.FC<CatalogViewerColumnProps> = ({ tableRef, col
                             <Box
                                 component="span"
                                 sx={{
-                                    fontFamily: 'monospace',
+                                    fontFamily: tokens.fontFamilyMono,
                                     fontStyle: 'italic',
                                     color: 'text.disabled',
                                 }}

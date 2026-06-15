@@ -24,6 +24,7 @@ import SchemaProvider from './../../sql/SchemaProvider'
 import Catalog from './../../schema/Catalog'
 import TableReference from '../../schema/TableReference'
 import { ViewerStateManager, buildPath } from './ViewerState'
+import { useTrinoTokens } from '../../theme/useTrinoTokens'
 
 interface CatalogViewerProps {
     initialFilterText?: string
@@ -42,6 +43,8 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
     enableSearchColumns,
     requestHeaders,
 }) => {
+    const tokens = useTrinoTokens()
+
     // Basic state
     const [catalogs, setCatalogs] = useState<Map<string, Catalog>>(new Map())
     const [errorMessage, setErrorMessage] = useState<string>()
@@ -221,27 +224,27 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                         sx={{
                             flex: 1,
                             mr: 0,
-                            '& .MuiInputBase-input': { fontSize: '0.6rem' },
-                            '& .MuiInputBase-input::placeholder': { fontSize: '0.6rem' },
-                            '& .MuiInputLabel-root': { fontSize: '0.6rem' },
+                            '& .MuiInputBase-input': { fontSize: tokens.fontSizeCatalogFilter },
+                            '& .MuiInputBase-input::placeholder': { fontSize: tokens.fontSizeCatalogFilter },
+                            '& .MuiInputLabel-root': { fontSize: tokens.fontSizeCatalogFilter },
                         }}
                         value={filterText}
                         onChange={(e) => setFilterText(e.target.value)}
                         fullWidth
                     />
                     <IconButton title="Refresh" size="small" onClick={loadCatalogs} disabled={isLoading}>
-                        <RefreshIcon sx={{ fontSize: '1.2rem' }} />
+                        <RefreshIcon sx={{ fontSize: tokens.fontSizeToolbarIcon }} />
                     </IconButton>
                     <IconButton title="Close drawer" size="small" onClick={onDrawerToggle}>
-                        <ChevronLeftIcon sx={{ fontSize: '1.2rem' }} />
+                        <ChevronLeftIcon sx={{ fontSize: tokens.fontSizeToolbarIcon }} />
                     </IconButton>
                 </Box>
                 {enableSearchColumns && (
                     <Box
                         sx={{
-                            '& .MuiInputBase-input': { fontSize: '0.6rem' },
-                            '& .MuiInputBase-input::placeholder': { fontSize: '0.6rem' },
-                            '& .MuiInputLabel-root': { fontSize: '0.6rem' },
+                            '& .MuiInputBase-input': { fontSize: tokens.fontSizeCatalogFilter },
+                            '& .MuiInputBase-input::placeholder': { fontSize: tokens.fontSizeCatalogFilter },
+                            '& .MuiInputLabel-root': { fontSize: tokens.fontSizeCatalogFilter },
                             width: '100%',
                             px: 1,
                         }}
@@ -262,7 +265,7 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                         sx={{
                                             px: 0.1,
                                             pt: 0.1,
-                                            fontSize: '0.5rem',
+                                            fontSize: tokens.fontSizeActionButton,
                                         }}
                                     >
                                         Search columns
@@ -292,7 +295,7 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                 <SimpleTreeView
                     sx={{
                         '& .MuiTreeItem-content': {
-                            minHeight: 24,
+                            minHeight: tokens.treeItemMinHeight,
                             py: 0.2,
                             my: 0,
                             gap: 0.5,
@@ -333,7 +336,7 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                                 onClick={(e) => handleGenerateCatalogQuery(e, catalogName)}
                                                 disabled={isLoading}
                                             >
-                                                <ChevronRightIcon sx={{ fontSize: 14 }} />
+                                                <ChevronRightIcon sx={{ fontSize: tokens.fontSizeCatalogTreeIcon }} />
                                             </IconButton>
                                         </Box>
                                     }

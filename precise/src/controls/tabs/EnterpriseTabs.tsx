@@ -5,6 +5,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import TabsEllipsesMenu from './TabsEllipsesMenu'
 import Tabs from './Tabs'
 import TabInfo from './TabInfo'
+import { TokensContext } from '../../theme/TokenContext'
 
 interface EnterpriseTabsProps<T extends TabInfo> {
     tabs: Tabs<T>
@@ -28,6 +29,9 @@ interface EnterpriseTabsState<T extends TabInfo> {
 }
 
 class EnterpriseTabs<T extends TabInfo> extends Component<EnterpriseTabsProps<T>, EnterpriseTabsState<T>> {
+    static contextType = TokensContext
+    declare context: React.ContextType<typeof TokensContext>
+
     private isUpdating: boolean = false
 
     constructor(props: EnterpriseTabsProps<T>) {
@@ -241,7 +245,7 @@ class EnterpriseTabs<T extends TabInfo> extends Component<EnterpriseTabsProps<T>
                                     )
                                 }
                                 sx={{
-                                    minHeight: 36,
+                                    minHeight: this.context.tabMinHeight,
                                     py: 0,
                                     textTransform: 'none',
                                     opacity: this.state.draggedIndex === index ? 0.5 : 1,

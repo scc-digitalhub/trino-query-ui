@@ -2,12 +2,14 @@ import React, { useState } from 'react'
 import { Button, Tooltip } from '@mui/material'
 import CopyAllOutlinedIcon from '@mui/icons-material/CopyAllOutlined'
 import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined'
+import { useTrinoTokens } from '../theme/useTrinoTokens'
 
 interface CopyLinkProps {
     copy: () => void
 }
 
 const CopyLink: React.FC<CopyLinkProps> = ({ copy }) => {
+    const tokens = useTrinoTokens()
     const [copied, setCopied] = useState(false)
 
     const handleCopy = () => {
@@ -22,12 +24,12 @@ const CopyLink: React.FC<CopyLinkProps> = ({ copy }) => {
                 variant={copied ? 'contained' : 'outlined'}
                 color={copied ? 'success' : 'primary'}
                 size="small"
-                sx={{ fontSize: '0.5rem' }}
+                sx={{ fontSize: tokens.fontSizeActionButton }}
                 startIcon={
                     copied ? (
-                        <DoneOutlinedIcon sx={{ fontSize: '0.5rem' }} />
+                        <DoneOutlinedIcon sx={{ fontSize: tokens.fontSizeActionButton }} />
                     ) : (
-                        <CopyAllOutlinedIcon sx={{ fontSize: '0.5rem' }} />
+                        <CopyAllOutlinedIcon sx={{ fontSize: tokens.fontSizeActionButton }} />
                     )
                 }
                 onClick={handleCopy}

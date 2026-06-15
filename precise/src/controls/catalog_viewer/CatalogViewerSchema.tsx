@@ -8,6 +8,7 @@ import Table from '../../schema/Table'
 import CatalogViewerTable from './CatalogViewerTable'
 import TableReference from '../../schema/TableReference'
 import { buildPath } from './ViewerState'
+import { useTrinoTokens } from '../../theme/useTrinoTokens'
 
 interface SchemaProps {
     catalogName: string
@@ -33,6 +34,7 @@ const CatalogViewerSchema: React.FC<SchemaProps> = ({
     hasMatchingChildren,
     onGenerateQuery,
 }) => {
+    const tokens = useTrinoTokens()
     const schemaPath = buildPath.schema(catalogName, schema.getName())
 
     // Check visibility using the passed down helper
@@ -71,7 +73,7 @@ const CatalogViewerSchema: React.FC<SchemaProps> = ({
                         onClick={handleGenerateQuery}
                         disabled={isLoading}
                     >
-                        <ChevronRightIcon sx={{ fontSize: 14 }} />
+                        <ChevronRightIcon sx={{ fontSize: tokens.fontSizeCatalogTreeIcon }} />
                     </IconButton>
                 </Box>
             }

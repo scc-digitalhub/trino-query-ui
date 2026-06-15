@@ -24,9 +24,9 @@ import NamedQuery from './sql/NamedQuery'
 import { tokenMap } from './sql/TokenMap'
 import SubstitutionEditor from './SubstitutionEditor'
 import { format } from 'sql-formatter'
+import { TokensContext } from './theme/TokenContext'
 
 const TRINO_SQL_LANGUAGE = 'trinosql'
-const TABS_HEIGHT = 64
 
 interface QueryEditorPaneProps {
     queries: Queries
@@ -93,6 +93,9 @@ class CustomTokenizerState implements monaco.languages.IState {
 }
 
 class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorPaneState> {
+    static contextType = TokensContext
+    declare context: React.ContextType<typeof TokensContext>
+
     private editorRef: monaco.editor.IStandaloneCodeEditor | null = null
     private isRunningParse: boolean = false
     private updateCounter: number = 0
@@ -904,22 +907,22 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
                     >
                         <Tooltip title="Format SQL (Alt+Shift+F)">
                             <IconButton size="small" onClick={this.formatSql}>
-                                <CodeIcon sx={{ fontSize: '1.2rem' }} />
+                                <CodeIcon sx={{ fontSize: this.context.fontSizeToolbarIcon }} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title={isMaximized ? 'Minimize' : 'Maximize'}>
                             <IconButton size="small" onClick={this.toggleMaximize}>
                                 {isMaximized ? (
-                                    <Minimize sx={{ fontSize: '1.2rem' }} />
+                                    <Minimize sx={{ fontSize: this.context.fontSizeToolbarIcon }} />
                                 ) : (
-                                    <Maximize sx={{ fontSize: '1.2rem' }} />
+                                    <Maximize sx={{ fontSize: this.context.fontSizeToolbarIcon }} />
                                 )}
                             </IconButton>
                         </Tooltip>
                     </Stack>
                     <Box
                         sx={{
-                            height: height - TABS_HEIGHT,
+                            height: height - this.context.tabsHeight,
                         }}
                     >
                         <Editor

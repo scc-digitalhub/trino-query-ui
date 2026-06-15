@@ -1,20 +1,22 @@
 import React from 'react'
 import { Button, Tooltip } from '@mui/material'
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined'
+import { useTrinoTokens } from '../theme/useTrinoTokens'
 
 interface DownloadCsvButtonProps {
     download: () => void
 }
 
 const DownloadCsvButton: React.FC<DownloadCsvButtonProps> = ({ download }) => {
+    const tokens = useTrinoTokens()
     return (
         <Tooltip title="Download as CSV">
             <Button
                 variant="outlined"
                 color="primary"
                 size="small"
-                sx={{ fontSize: '0.5rem' }}
-                startIcon={<DownloadOutlinedIcon sx={{ fontSize: '0.5rem' }} />}
+                sx={{ fontSize: tokens.fontSizeActionButton }}
+                startIcon={<DownloadOutlinedIcon sx={{ fontSize: tokens.fontSizeActionButton }} />}
                 onClick={download}
             >
                 CSV

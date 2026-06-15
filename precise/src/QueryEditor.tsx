@@ -1,16 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { styled } from '@mui/material/styles'
 import { Box, Drawer, useMediaQuery } from '@mui/material'
 import CssBaseline from '@mui/material/CssBaseline'
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar'
 import { ThemeProvider } from '@mui/material/styles'
 import QueryCell from './QueryCell'
-import { darkTheme, lightTheme } from './theme'
+import { createDarkTheme, createLightTheme } from './theme/theme'
 import Queries from './schema/Queries'
 import QueryInfo from './schema/QueryInfo'
 import CatalogViewer from './controls/catalog_viewer/CatalogViewer'
 import SchemaProvider from './sql/SchemaProvider'
 import { ResultSetStore } from './utils/resultSetStore'
+import { defaultTokens, type TrinoStyleTokens } from './theme/tokens'
+import { TrinoTokensProvider } from './theme/TrinoTokensProvider'
 
 interface IQueryEditor {
     height: number
@@ -18,13 +20,15 @@ interface IQueryEditor {
     enableCatalogSearchColumns?: boolean
     requestHeaders?: Record<string, string>
     resultSetStore?: ResultSetStore
+    tokens?: Partial<TrinoStyleTokens>
 }
 
-const DRAWER_WIDTH = 260
-
-const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
+const Main = styled('main', {
+    shouldForwardProp: (prop) => prop !== 'open' && prop !== 'drawerWidth',
+})<{
     open?: boolean
-}>(({ theme }) => ({
+    drawerWidth?: number
+}>(({ theme, open, drawerWidth = defaultTokens.drawerWidth }) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
     transition: theme.transitions.create('margin', {
@@ -32,27 +36,23 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
         duration: theme.transitions.duration.leavingScreen,
     }),
     marginLeft: 0,
-    variants: [
-        {
-            props: ({ open }) => open,
-            style: {
-                transition: theme.transitions.create('margin', {
-                    easing: theme.transitions.easing.easeOut,
-                    duration: theme.transitions.duration.enteringScreen,
-                }),
-                marginLeft: `${DRAWER_WIDTH}px`,
-            },
-        },
-    ],
+    ...(open && {
+        transition: theme.transitions.create('margin', {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+        marginLeft: `${drawerWidth}px`,
+    }),
 }))
 
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean
+    drawerWidth?: number
 }
 
 const AppBar = styled(MuiAppBar, {
-    shouldForwardProp: (prop) => prop !== 'open',
-})<AppBarProps>(({ theme }) => ({
+    shouldForwardProp: (prop) => prop !== 'open' && prop !== 'drawerWidth',
+})<AppBarProps>(({ theme, open, drawerWidth = defaultTokens.drawerWidth }) => ({
     position: 'absolute',
     boxShadow: 'none',
     borderBottom: `1px solid ${theme.palette.divider}`,
@@ -60,19 +60,14 @@ const AppBar = styled(MuiAppBar, {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
     }),
-    variants: [
-        {
-            props: ({ open }) => open,
-            style: {
-                width: `calc(100% - ${DRAWER_WIDTH}px)`,
-                marginLeft: `${DRAWER_WIDTH}px`,
-                transition: theme.transitions.create(['margin', 'width'], {
-                    easing: theme.transitions.easing.easeOut,
-                    duration: theme.transitions.duration.enteringScreen,
-                }),
-            },
-        },
-    ],
+    ...(open && {
+        width: `calc(100% - ${drawerWidth}px)`,
+        marginLeft: `${drawerWidth}px`,
+        transition: theme.transitions.create(['margin', 'width'], {
+            easing: theme.transitions.easing.easeOut,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    }),
 }))
 
 export const QueryEditor = ({
@@ -81,7 +76,13 @@ export const QueryEditor = ({
     enableCatalogSearchColumns,
     requestHeaders,
     resultSetStore,
+    tokens: styleTokens,
 }: IQueryEditor) => {
+    const resolvedTokens = useMemo(
+        () => (styleTokens ? { ...defaultTokens, ...styleTokens } : defaultTokens),
+        [styleTokens]
+    )
+    const drawerWidth = resolvedTokens.drawerWidth
     const [queries, setQueries] = useState<Queries>(() => new Queries())
     const [drawerOpen, setDrawerOpen] = useState<boolean>(true)
     const [queryRunning, setQueryRunning] = useState<boolean>(false)
@@ -94,17 +95,17 @@ export const QueryEditor = ({
         SchemaProvider.setRequestHeaders(requestHeaders ?? {})
     }, [requestHeaders])
 
-    const muiThemeToUse = () => {
+    const muiThemeToUse = useMemo(() => {
         if (theme === 'dark') {
-            return darkTheme
+            return createDarkTheme(resolvedTokens)
         } else if (theme === 'light') {
-            return lightTheme
+            return createLightTheme(resolvedTokens)
         } else if (prefersDarkMode) {
-            return darkTheme
+            return createDarkTheme(resolvedTokens)
         } else {
-            return lightTheme
+            return createLightTheme(resolvedTokens)
         }
-    }
+    }, [prefersDarkMode, resolvedTokens, theme])
 
     const applyQueryUpdates = (updates: Partial<QueryInfo>) => {
         const activeQuery = queries.getCurrentQuery()
@@ -157,69 +158,71 @@ export const QueryEditor = ({
     }
 
     return (
-        <ThemeProvider theme={muiThemeToUse()}>
-            <CssBaseline />
-            <Box
-                ref={containerRef}
-                sx={{
-                    border: 1,
-                    borderColor: 'divider',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    height: height,
-                }}
-            >
-                <AppBar color="transparent" open={drawerOpen} />
-
-                <Drawer
+        <TrinoTokensProvider tokens={resolvedTokens}>
+            <ThemeProvider theme={muiThemeToUse}>
+                <CssBaseline />
+                <Box
+                    ref={containerRef}
                     sx={{
-                        width: DRAWER_WIDTH,
-                        flexShrink: 0,
-                        '& .MuiDrawer-paper': {
-                            width: DRAWER_WIDTH,
-                            boxSizing: 'border-box',
-                        },
-                    }}
-                    variant="persistent"
-                    anchor="left"
-                    open={drawerOpen}
-                    ModalProps={{
-                        container: containerRef.current,
-                        disablePortal: true,
-                    }}
-                    slotProps={{
-                        paper: {
-                            sx: {
-                                position: 'absolute',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                overflow: 'hidden',
-                            },
-                        },
+                        border: 1,
+                        borderColor: 'divider',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        height: height,
                     }}
                 >
-                    <CatalogViewer
-                        onGenerateQuery={setQueryContent}
-                        onAppendQuery={appendQueryContent}
-                        onDrawerToggle={() => setDrawerOpen(false)}
-                        enableSearchColumns={enableCatalogSearchColumns}
-                        requestHeaders={requestHeaders}
-                    />
-                </Drawer>
+                    <AppBar color="transparent" open={drawerOpen} drawerWidth={drawerWidth} />
 
-                <Main open={drawerOpen} sx={{ p: 0 }}>
-                    <QueryCell
-                        queries={queries}
-                        drawerOpen={drawerOpen}
-                        height={height}
-                        onDrawerToggle={() => setDrawerOpen(true)}
-                        theme={theme}
-                        requestHeaders={requestHeaders}
-                        resultSetStore={resultSetStore}
-                    />
-                </Main>
-            </Box>
-        </ThemeProvider>
+                    <Drawer
+                        sx={{
+                            width: drawerWidth,
+                            flexShrink: 0,
+                            '& .MuiDrawer-paper': {
+                                width: drawerWidth,
+                                boxSizing: 'border-box',
+                            },
+                        }}
+                        variant="persistent"
+                        anchor="left"
+                        open={drawerOpen}
+                        ModalProps={{
+                            container: containerRef.current,
+                            disablePortal: true,
+                        }}
+                        slotProps={{
+                            paper: {
+                                sx: {
+                                    position: 'absolute',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    overflow: 'hidden',
+                                },
+                            },
+                        }}
+                    >
+                        <CatalogViewer
+                            onGenerateQuery={setQueryContent}
+                            onAppendQuery={appendQueryContent}
+                            onDrawerToggle={() => setDrawerOpen(false)}
+                            enableSearchColumns={enableCatalogSearchColumns}
+                            requestHeaders={requestHeaders}
+                        />
+                    </Drawer>
+
+                    <Main open={drawerOpen} drawerWidth={drawerWidth} sx={{ p: 0 }}>
+                        <QueryCell
+                            queries={queries}
+                            drawerOpen={drawerOpen}
+                            height={height}
+                            onDrawerToggle={() => setDrawerOpen(true)}
+                            theme={theme}
+                            requestHeaders={requestHeaders}
+                            resultSetStore={resultSetStore}
+                        />
+                    </Main>
+                </Box>
+            </ThemeProvider>
+        </TrinoTokensProvider>
     )
 }
 

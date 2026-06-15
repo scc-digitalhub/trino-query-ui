@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Box, Stack, Typography, TextField, InputAdornment, IconButton } from '@mui/material'
 import ClearIcon from '@mui/icons-material/Clear'
+import { useTrinoTokens } from './theme/useTrinoTokens'
 
 interface SubstitutionField {
     name: string
@@ -15,6 +16,7 @@ interface SubstitutionEditorProps {
 }
 
 const SubstitutionEditor: React.FC<SubstitutionEditorProps> = ({ query, onSubstitutionChange }) => {
+    const tokens = useTrinoTokens()
     const [fields, setFields] = useState<SubstitutionField[]>([])
     const [values, setValues] = useState<Record<string, string>>({})
 
@@ -94,7 +96,7 @@ const SubstitutionEditor: React.FC<SubstitutionEditorProps> = ({ query, onSubsti
                                                 onClick={() => handleInputChange(field.name, '')}
                                                 sx={{
                                                     visibility: val ? 'visible' : 'hidden',
-                                                    '& .MuiSvgIcon-root': { fontSize: 16 },
+                                                    '& .MuiSvgIcon-root': { fontSize: tokens.fontSizeClearIcon },
                                                 }}
                                             >
                                                 <ClearIcon />

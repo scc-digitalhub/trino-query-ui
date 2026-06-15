@@ -22,6 +22,7 @@ import ReactDOMServer from 'react-dom/server'
 import CopyLink from './utils/CopyLink'
 import ClearButton from './utils/ClearButton'
 import DownloadCsvButton from './utils/DownloadCsvButton'
+import { TokensContext } from './theme/TokenContext'
 
 interface ResultSetProps {
     queryId: string | undefined
@@ -35,6 +36,9 @@ interface ResultSetProps {
 }
 
 class ResultSet extends React.Component<ResultSetProps> {
+    static contextType = TokensContext
+    declare context: React.ContextType<typeof TokensContext>
+
     previousRunningPercentage: number = 0
     statsHistory: any[] = []
     lastQueryId: string | undefined = undefined
@@ -155,7 +159,7 @@ class ResultSet extends React.Component<ResultSetProps> {
                     sx={{
                         width: '100%',
                         height: '100%',
-                        '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 600 },
+                        '& .MuiDataGrid-columnHeaderTitle': { fontWeight: this.context.fontWeightLabel },
                     }}
                     getRowId={(row) => String(row['mui-row-id'])}
                     density="compact"
@@ -301,9 +305,7 @@ class ResultSet extends React.Component<ResultSetProps> {
         }
 
         const header = columns.map((column: any) => escapeCell(column.name)).join(',')
-        const rows = results
-            .flat()
-            .map((row: any[]) => row.map((cell: any) => escapeCell(cell)).join(','))
+        const rows = results.flat().map((row: any[]) => row.map((cell: any) => escapeCell(cell)).join(','))
         return [header, ...rows].join('\n')
     }
 
@@ -402,7 +404,13 @@ class ResultSet extends React.Component<ResultSetProps> {
         return (
             <Box>
                 {response && response.id ? (
-                    <Box display="flex" alignItems="center" gap={1} fontSize="0.8rem" sx={{ p: 1 }}>
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        gap={1}
+                        fontSize={this.context.fontSizeResultBar}
+                        sx={{ p: 1 }}
+                    >
                         {errorMessage ? (
                             <Alert severity="error" sx={{ py: 0 }}>
                                 {errorMessage}
@@ -413,7 +421,15 @@ class ResultSet extends React.Component<ResultSetProps> {
                                 {truncationMessage}
                             </Alert>
                         ) : null}
-                        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1, fontSize: '0.8rem' }}>
+                        <Box
+                            sx={{
+                                ml: 'auto',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                fontSize: this.context.fontSizeResultBar,
+                            }}
+                        >
                             <Typography variant="caption" sx={{ whiteSpace: 'nowrap' }}>
                                 {this.getRowCount()} rows:
                             </Typography>
@@ -480,8 +496,8 @@ class ResultSet extends React.Component<ResultSetProps> {
                                 <TableContainer
                                     component={Paper}
                                     sx={{
-                                        // decrease the resultset size by the header size
-                                        height: height - 42,
+                                        // decrease the resultset size by the status bar height
+                                        height: height - this.context.resultBarHeight,
                                         overflowY: 'auto',
                                     }}
                                 >
@@ -498,7 +514,7 @@ class ResultSet extends React.Component<ResultSetProps> {
                                         stickyHeader
                                     >
                                         <TableHead>
-                                            <TableRow sx={{ '& th': { fontWeight: 600 } }}>
+                                            <TableRow sx={{ '& th': { fontWeight: this.context.fontWeightLabel } }}>
                                                 <TableCell align="left" colSpan={3}>
                                                     Query run metrics
                                                 </TableCell>
@@ -512,7 +528,7 @@ class ResultSet extends React.Component<ResultSetProps> {
                                                     Splits
                                                 </TableCell>
                                             </TableRow>
-                                            <TableRow sx={{ '& th': { fontWeight: 600 } }}>
+                                            <TableRow sx={{ '& th': { fontWeight: this.context.fontWeightLabel } }}>
                                                 <TableCell>Stage</TableCell>
                                                 <TableCell>Nodes</TableCell>
                                                 <TableCell align="right">Processed</TableCell>
@@ -678,7 +694,9 @@ class ResultSet extends React.Component<ResultSetProps> {
                         </Box>
                     </>
                 ) : columns && columns.length ? (
-                    <Box sx={{ position: 'relative', height: height - 42 }}>{this.renderTable(results, columns)}</Box>
+                    <Box sx={{ position: 'relative', height: height - this.context.resultBarHeight }}>
+                        {this.renderTable(results, columns)}
+                    </Box>
                 ) : null}
             </Box>
         )

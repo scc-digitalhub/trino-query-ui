@@ -13,8 +13,7 @@ import Queries from './schema/Queries'
 import QueryInfo from './schema/QueryInfo'
 import AsyncTrinoClient from './AsyncTrinoClient'
 import { localStorageResultSetStore, type ResultSetSnapshot, type ResultSetStore } from './utils/resultSetStore'
-
-const TOOLBAR_HEIGHT = 64
+import { TokensContext } from './theme/TokenContext'
 
 interface QueryCellState {
     results: any[]
@@ -41,6 +40,9 @@ interface QueryCellProps {
 }
 
 class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
+    static contextType = TokensContext
+    declare context: React.ContextType<typeof TokensContext>
+
     private queryRunner: AsyncTrinoClient
     private readonly resultStore: ResultSetStore
     private readonly snapshots = new Map<string, ResultSetSnapshot>()
@@ -307,7 +309,8 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
             response.stats !== undefined &&
             (response.stats.state === 'RUNNING' || response.stats.state === 'QUEUED')
 
-        const availablePanelHeight = Math.max(this.props.height - TOOLBAR_HEIGHT, 0)
+        const tokens = this.context
+        const availablePanelHeight = Math.max(this.props.height - tokens.toolbarHeight, 0)
         const resultSetHeight = this.state.editorCollapsed ? availablePanelHeight : availablePanelHeight / 2
 
         return (
@@ -342,18 +345,21 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
                     <Box sx={{ flexGrow: 1 }} />
                     <Stack direction="row" spacing={3} sx={{ mr: 2 }} alignItems="baseline">
                         <Stack direction="row" spacing={1}>
-                            <Box component="span" sx={{ fontWeight: 600, color: 'text.secondary', mr: 0.5 }}>
+                            <Box
+                                component="span"
+                                sx={{ fontWeight: tokens.fontWeightLabel, color: 'text.secondary', mr: 0.5 }}
+                            >
                                 Catalog:
                             </Box>
                             {this.renderEditableTextField('editingCatalog', currentQuery.catalog ?? '', {
                                 typographyProps: {
-                                    sx: { ml: 2, maxWidth: 200, fontFamily: 'monospace' },
+                                    sx: { ml: 2, maxWidth: 200, fontFamily: tokens.fontFamilyMono },
                                     noWrap: true,
                                 },
                                 textFieldProps: {
                                     sx: {
                                         maxWidth: 200,
-                                        '& .MuiInputBase-input': { fontFamily: 'monospace' },
+                                        '& .MuiInputBase-input': { fontFamily: tokens.fontFamilyMono },
                                     },
                                     onChange: (event) => this.handleCatalogChange(event.target.value),
                                 },
@@ -369,18 +375,21 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
                         </Stack>
 
                         <Stack direction="row" spacing={1}>
-                            <Box component="span" sx={{ fontWeight: 600, color: 'text.secondary', mr: 0.5 }}>
+                            <Box
+                                component="span"
+                                sx={{ fontWeight: tokens.fontWeightLabel, color: 'text.secondary', mr: 0.5 }}
+                            >
                                 Schema:
                             </Box>
                             {this.renderEditableTextField('editingSchema', currentQuery.schema ?? '', {
                                 typographyProps: {
-                                    sx: { ml: 2, maxWidth: 200, fontFamily: 'monospace' },
+                                    sx: { ml: 2, maxWidth: 200, fontFamily: tokens.fontFamilyMono },
                                     noWrap: true,
                                 },
                                 textFieldProps: {
                                     sx: {
                                         maxWidth: 200,
-                                        '& .MuiInputBase-input': { fontFamily: 'monospace' },
+                                        '& .MuiInputBase-input': { fontFamily: tokens.fontFamilyMono },
                                     },
                                     onChange: (event) => this.handleSchemaChange(event.target.value),
                                 },

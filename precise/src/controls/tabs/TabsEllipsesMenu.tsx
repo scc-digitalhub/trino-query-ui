@@ -3,6 +3,7 @@ import { Box, IconButton, Popover, TextField, List, ListItemButton, ListItemText
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import PushPinIcon from '@mui/icons-material/PushPin'
 import TabInfo from './TabInfo'
+import { useTrinoTokens } from '../../theme/useTrinoTokens'
 
 interface TabsEllipsesMenuProps<T extends TabInfo> {
     tabs: T[]
@@ -15,6 +16,7 @@ function TabsEllipsesMenu<T extends TabInfo>({
     onTabSelect,
     filterPlaceholder = 'Filter tabs...',
 }: TabsEllipsesMenuProps<T>) {
+    const tokens = useTrinoTokens()
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
     const [filter, setFilter] = useState('')
 
@@ -52,7 +54,7 @@ function TabsEllipsesMenu<T extends TabInfo>({
                         onChange={(e) => setFilter(e.target.value)}
                         sx={{ mb: 1 }}
                     />
-                    <List dense disablePadding sx={{ maxHeight: 300, overflow: 'auto' }}>
+                    <List dense disablePadding sx={{ maxHeight: tokens.tabsEllipsisMenuMaxHeight, overflow: 'auto' }}>
                         {filteredTabs.map((tab) => (
                             <ListItemButton
                                 key={tab.id}
