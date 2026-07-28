@@ -73,18 +73,24 @@ const CatalogViewerTable: React.FC<CatalogViewerTableProps> = ({
                         gap: 8,
                         cursor: 'pointer',
                         width: '100%',
+                        minWidth: 0,
                     }}
                     onClick={(e) => {
                         e.stopPropagation()
                         onToggle?.(tablePath)
                     }}
                 >
-                    <Typography fontSize="small">{table.getName()}</Typography>
+                    <Typography
+                        fontSize="small"
+                        sx={{ flex: 1, minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                    >
+                        {table.getName()}
+                    </Typography>
 
                     <IconButton
                         title="Generate SELECT query for this table"
                         size="small"
-                        sx={{ ml: 'auto' }}
+                        sx={{ ml: 'auto', flexShrink: 0 }}
                         onClick={handleGenerateQuery}
                         disabled={isLoading}
                     >
@@ -95,7 +101,8 @@ const CatalogViewerTable: React.FC<CatalogViewerTableProps> = ({
             slotProps={{
                 label: {
                     style: {
-                        overflow: 'visible',
+                        overflow: 'hidden',
+                        minWidth: 0,
                     },
                 },
             }}

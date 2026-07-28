@@ -64,6 +64,7 @@ const CatalogViewerSchema: React.FC<SchemaProps> = ({
                         gap: 8,
                         cursor: 'pointer',
                         width: '100%',
+                        minWidth: 0,
                     }}
                     onClick={(e) => {
                         e.stopPropagation()
@@ -73,12 +74,17 @@ const CatalogViewerSchema: React.FC<SchemaProps> = ({
                         }
                     }}
                 >
-                    <Typography fontSize="small">{schema.getName()}</Typography>
+                    <Typography
+                        fontSize="small"
+                        sx={{ flex: 1, minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                    >
+                        {schema.getName()}
+                    </Typography>
 
                     <IconButton
                         title="Set this schema as default schema"
                         size="small"
-                        sx={{ ml: 'auto' }}
+                        sx={{ ml: 'auto', flexShrink: 0 }}
                         onClick={handleGenerateQuery}
                         disabled={isLoading}
                     >
@@ -89,7 +95,8 @@ const CatalogViewerSchema: React.FC<SchemaProps> = ({
             slotProps={{
                 label: {
                     style: {
-                        overflow: 'visible',
+                        overflow: 'hidden',
+                        minWidth: 0,
                     },
                 },
             }}

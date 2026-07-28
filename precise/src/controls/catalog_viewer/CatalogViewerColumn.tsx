@@ -29,10 +29,15 @@ const CatalogViewerColumn: React.FC<CatalogViewerColumnProps> = ({ tableRef, col
                         display: 'flex',
                         alignItems: 'center',
                         gap: 8,
+                        minWidth: 0,
+                        width: '100%',
                     }}
                 >
-                    <Stack direction="row">
-                        <Typography fontSize="small" noWrap>
+                    <Stack direction="row" sx={{ minWidth: 0, flex: 1 }}>
+                        <Typography
+                            fontSize="small"
+                            sx={{ minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                        >
                             <Box component="span" sx={{ mr: 1 }}>
                                 {column.getName()}
                             </Box>
@@ -53,7 +58,8 @@ const CatalogViewerColumn: React.FC<CatalogViewerColumnProps> = ({ tableRef, col
             slotProps={{
                 label: {
                     style: {
-                        overflow: 'visible',
+                        overflow: 'hidden',
+                        minWidth: 0,
                     },
                 },
             }}
