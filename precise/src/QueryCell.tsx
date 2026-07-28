@@ -5,6 +5,9 @@ import type { TypographyProps } from '@mui/material/Typography'
 import MenuIcon from '@mui/icons-material/Menu'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import CodeIcon from '@mui/icons-material/Code'
+import MinimizeIcon from '@mui/icons-material/Minimize'
+import RemoveIcon from '@mui/icons-material/Remove'
 import QueryEditorPane from './QueryEditorPane'
 import ResultSet from './ResultSet'
 import Queries from './schema/Queries'
@@ -27,6 +30,7 @@ interface QueryCellState {
     editingCatalog: boolean
     editingSchema: boolean
     editorCollapsed: boolean
+    editorMaximized: boolean
 }
 
 import { Theme } from '@mui/material/styles'
@@ -46,6 +50,7 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
     private queryRunner: AsyncTrinoClient
     private readonly resultStore: ResultSetStore
     private readonly snapshots = new Map<string, ResultSetSnapshot>()
+    private editorPaneRef = React.createRef<QueryEditorPane>()
 
     private readonly emptySnapshot: ResultSetSnapshot = {
         results: [],
@@ -71,6 +76,7 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
             editingCatalog: false,
             editingSchema: false,
             editorCollapsed: false,
+            editorMaximized: false,
         }
         this.queryRunner = TrinoClientProvider.createClient()
         this.setupQueryRunner()
@@ -103,7 +109,8 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
             this.state.editingTitle !== nextState.editingTitle ||
             this.state.editingCatalog !== nextState.editingCatalog ||
             this.state.editingSchema !== nextState.editingSchema ||
-            this.state.editorCollapsed !== nextState.editorCollapsed
+            this.state.editorCollapsed !== nextState.editorCollapsed ||
+            this.state.editorMaximized !== nextState.editorMaximized
         )
     }
 
@@ -244,7 +251,28 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
     }
 
     toggleQueryCollapse = () => {
-        this.setState({ editorCollapsed: !this.state.editorCollapsed })
+        this.setState((prevState) => ({
+            editorCollapsed: !prevState.editorCollapsed,
+            editorMaximized: false,
+        }))
+    }
+
+    toggleEditorMaximize = () => {
+        this.setState(
+            (prevState) => ({
+                editorMaximized: !prevState.editorMaximized,
+                editorCollapsed: false,
+            }),
+            () => {
+                const availablePanelHeight = Math.max(this.props.height - TOOLBAR_HEIGHT, 0)
+                if (this.editorPaneRef.current) {
+                    this.editorPaneRef.current.setState({
+                        isMaximized: this.state.editorMaximized,
+                        height: this.state.editorMaximized ? availablePanelHeight : availablePanelHeight / 2,
+                    })
+                }
+            }
+        )
     }
 
     private renderEditableTextField(
@@ -391,13 +419,29 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
                             })}
                         </Stack>
                     </Stack>
+                    <IconButton
+                        color="inherit"
+                        title="Format SQL (Alt+Shift+F)"
+                        onClick={() => this.editorPaneRef.current?.formatSql()}
+                        disabled={this.state.editorCollapsed}
+                    >
+                        <CodeIcon />
+                    </IconButton>
+                    <IconButton
+                        color="inherit"
+                        title={this.state.editorMaximized ? "Minimize editor" : "Maximize editor"}
+                        onClick={this.toggleEditorMaximize}
+                    >
+                        {this.state.editorMaximized ? <MinimizeIcon /> : <RemoveIcon />}
+                    </IconButton>
                     <IconButton color="inherit" title={this.state.editorCollapsed ? "Expand query" : "Collapse query"} onClick={this.toggleQueryCollapse}>
-                        {this.state.editorCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+                        {this.state.editorCollapsed ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </IconButton>
                 </Toolbar>
                 <Divider />
                 <Box sx={{ display: this.state.editorCollapsed ? 'none' : 'block' }}>
                     <QueryEditorPane
+                        ref={this.editorPaneRef}
                         onSelectChange={() => { }}
                         onExecute={() => this.Execute()}
                         isQueryRunning={isQueryRunning}
@@ -406,19 +450,24 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
                         schema={currentQuery.schema}
                         theme={this.props.theme}
                         maxHeight={availablePanelHeight}
+                        onMaximizeChange={(maximized) => this.setState({ editorMaximized: maximized })}
                     />
-                    {this.props.theme != 'dark' && <Divider />}
+                    {this.props.theme != 'dark' && !this.state.editorMaximized && <Divider />}
                 </Box>
-                <ResultSet
-                    columns={columns}
-                    results={results}
-                    response={response}
-                    height={resultSetHeight}
-                    errorMessage={errorMessage}
-                    truncationMessage={truncationMessage}
-                    queryId={runningQuery?.id}
-                    onClearResults={() => this.ClearResults()}
-                />
+                <Box sx={{ display: this.state.editorMaximized ? 'none' : 'block' }}>
+                    <ResultSet
+                        columns={columns}
+                        results={results}
+                        response={response}
+                        height={resultSetHeight}
+                        errorMessage={errorMessage}
+                        truncationMessage={truncationMessage}
+                        queryId={runningQuery?.id}
+                        onClearResults={() => this.ClearResults()}
+                        onExecute={() => this.Execute()}
+                        isQueryRunning={isQueryRunning}
+                    />
+                </Box>
             </Box>
         )
     }
