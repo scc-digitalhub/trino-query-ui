@@ -226,6 +226,8 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                             },
                         }}
                         sx={{
+                            // Hidden for now
+                            display: 'none',
                             flex: 1,
                             mr: 0.5,
                             '& .MuiInputBase-input': {
@@ -259,6 +261,7 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                 {enableSearchColumns && (
                     <Box
                         sx={{
+                            display: 'none',
                             width: '100%',
                             px: 1,
                         }}
@@ -297,6 +300,7 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                 sx={{
                     flex: 1,
                     overflowY: 'auto',
+                    overflowX: 'hidden',
                     minHeight: 0,
                 }}
             >
@@ -314,6 +318,11 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                             py: 0.2,
                             my: 0,
                             gap: 0.5,
+                        },
+                        // Allow long identifiers to wrap instead of overflowing horizontally.
+                        '& .MuiTreeItem-label': {
+                            minWidth: 0,
+                            overflow: 'hidden',
                         },
                     }}
                 >
@@ -336,7 +345,7 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                     }}
                                     label={
                                         <Box
-                                            style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', width: '100%' }}
+                                            style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', width: '100%', minWidth: 0 }}
                                             onClick={(e) => {
                                                 e.stopPropagation()
                                                 handleToggle(catalogPath)
@@ -345,7 +354,12 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                                 }
                                             }}
                                         >
-                                            <Typography fontSize="small">{catalogName}</Typography>
+                                            <Typography
+                                                fontSize="small"
+                                                sx={{ flex: 1, minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                                            >
+                                                {catalogName}
+                                            </Typography>
                                             {catalog.getType() === 'system' && (
                                                 <Chip size="small" label="system catalog" />
                                             )}
@@ -353,7 +367,7 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                             <IconButton
                                                 title="Set this catalog as default catalog"
                                                 size="small"
-                                                sx={{ ml: 'auto' }}
+                                                sx={{ ml: 'auto', flexShrink: 0 }}
                                                 onClick={(e) => handleGenerateCatalogQuery(e, catalogName)}
                                                 disabled={isLoading}
                                             >
@@ -364,7 +378,8 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                     slotProps={{
                                         label: {
                                             style: {
-                                                overflow: 'visible',
+                                                overflow: 'hidden',
+                                                minWidth: 0,
                                             },
                                         },
                                     }}

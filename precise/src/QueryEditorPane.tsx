@@ -1,5 +1,5 @@
 import React from 'react'
-import { Box, Button, Divider, Stack, Tooltip, IconButton } from '@mui/material'
+import { Box, Button, Stack, Tooltip, IconButton } from '@mui/material'
 import { alpha, Theme } from '@mui/material/styles'
 import CodeIcon from '@mui/icons-material/Code'
 import Maximize from '@mui/icons-material/Maximize'
@@ -40,6 +40,7 @@ interface QueryEditorPaneProps {
     catalog?: string
     schema?: string
     theme?: 'dark' | 'light' | Theme | string
+    onMaximizeChange?: (maximized: boolean) => void
 }
 
 interface QueryEditorPaneState {
@@ -100,7 +101,7 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
     private monacoRef: typeof monaco | null = null
     private isRunningParse: boolean = false
     private updateCounter: number = 0
-    private parseCancelToken: { cancel: boolean } = { cancel: false }
+    private activeCancelToken: { cancel: boolean } | undefined = undefined
     private lastCompletionItemsPosition: monaco.Position | undefined = undefined
     private completionItems: monaco.languages.CompletionItem[] = []
 
@@ -192,11 +193,17 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
     }
 
     toggleMaximize = () => {
-        this.setState((prevState) => ({
-            isMaximized: !prevState.isMaximized,
-            height: !prevState.isMaximized ? this.props.maxHeight : this.props.maxHeight / 2,
-            width: '100%',
-        }))
+        const nextMaximized = !this.state.isMaximized
+        this.setState(
+            {
+                isMaximized: nextMaximized,
+                height: nextMaximized ? this.props.maxHeight : this.props.maxHeight / 2,
+                width: '100%',
+            },
+            () => {
+                this.props.onMaximizeChange?.(nextMaximized)
+            }
+        )
     }
 
     // method to get contents of react editor
@@ -211,7 +218,8 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
         }
 
         this.isRunningParse = true
-        this.parseCancelToken.cancel = false
+        const cancelToken: { cancel: boolean } = { cancel: false }
+        this.activeCancelToken = cancelToken
 
         try {
             let lastUpdateCounter = 0
@@ -220,25 +228,25 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
             do {
                 await new Promise<void>((resolve, reject) => {
                     setTimeout(() => {
-                        this.parseCancelToken.cancel ? reject(new Error('Parsing cancelled')) : resolve()
+                        cancelToken.cancel ? reject(new Error('Parsing cancelled')) : resolve()
                     }, waitForUserToStopTyping)
                 })
                 lastUpdateCounter = this.updateCounter
             } while (lastUpdateCounter !== this.updateCounter)
 
-            if (this.parseCancelToken.cancel) {
-                //console.error("cancelled parsing");
+            if (cancelToken.cancel) {
                 return false
             }
 
             // Call sync method
             return this.parseAndDecoratePromise(monaco, editor, lastUpdateCounter)
         } catch (error) {
-            //console.error(error);
             return false
         } finally {
-            this.isRunningParse = false
-            //console.error("end parsing:" + this.isRunningParse);
+            if (this.activeCancelToken === cancelToken) {
+                this.isRunningParse = false
+                this.activeCancelToken = undefined
+            }
         }
     }
 
@@ -337,8 +345,10 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
         if (currentTreePosition != undefined && currentTreePosition.symbol != undefined) {
             currentTreeIndex = currentTreePosition.symbol.tokenIndex
             //console.log("found symbol at " + currentTreePosition.symbol.tokenIndex);
-        } else {
+        } else if (currentTreePosition != undefined) {
             currentTreeIndex = currentTreePosition.ruleIndex
+        } else {
+            currentTreeIndex = 0
         }
 
         const markers = errors.getMarkers()
@@ -648,8 +658,10 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
     }
 
     cancelParsing() {
-        //console.error("CANCEL");
-        this.parseCancelToken.cancel = true
+        if (this.activeCancelToken) {
+            this.activeCancelToken.cancel = true
+            this.activeCancelToken = undefined
+        }
         this.isRunningParse = false
     }
 
@@ -891,63 +903,6 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
                     onSubstitutionChange={this.handleSubstitutionChange}
                 />
                 <Box sx={{ position: 'relative', width: '100%' }}>
-                    <Stack
-                        direction="row"
-                        spacing={1}
-                        sx={(theme) => ({
-                            position: 'absolute',
-                            alignItems: 'center',
-                            background: theme.palette.mode === 'dark' ? 'rgba(43, 48, 51, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-                            backdropFilter: 'blur(8px)',
-                            border: 1,
-                            borderColor: theme.palette.divider,
-                            borderRadius: '8px',
-                            boxShadow: '0px 4px 12px rgba(0,0,0,0.12)',
-                            px: 1,
-                            py: 0.5,
-                            top: 10,
-                            right: 44,
-                            zIndex: 1000,
-                        })}
-                    >
-                        <Tooltip title={!this.props.isQueryRunning ? "Run Query (Ctrl + Enter)" : "Stop Query"}>
-                            <Button
-                                variant="contained"
-                                color={!this.props.isQueryRunning ? 'primary' : 'error'}
-                                size="small"
-                                onClick={this.props.onExecute}
-                                startIcon={!this.props.isQueryRunning ? <PlayArrowIcon sx={{ fontSize: '1.1rem' }} /> : <StopIcon sx={{ fontSize: '1.1rem' }} />}
-                                sx={(theme) => ({
-                                    px: 2,
-                                    py: 0.5,
-                                    fontWeight: 600,
-                                    borderRadius: `${theme.shape.borderRadius}px`,
-                                    textTransform: 'none',
-                                    boxShadow: !this.props.isQueryRunning ? `0px 2px 4px ${alpha(theme.palette.primary.main, 0.25)}` : 'none',
-                                    '&:hover': {
-                                        boxShadow: !this.props.isQueryRunning ? `0px 4px 8px ${alpha(theme.palette.primary.main, 0.35)}` : 'none',
-                                    },
-                                })}
-                            >
-                                {!this.props.isQueryRunning ? 'Run Query' : 'Stop'}
-                            </Button>
-                        </Tooltip>
-                        <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
-                        <Tooltip title="Format SQL (Alt + Shift + F)">
-                            <IconButton size="small" onClick={this.formatSql}>
-                                <CodeIcon sx={{ fontSize: '1.2rem' }} />
-                            </IconButton>
-                        </Tooltip>
-                        <Tooltip title={isMaximized ? 'Minimize' : 'Maximize'}>
-                            <IconButton size="small" onClick={this.toggleMaximize}>
-                                {isMaximized ? (
-                                    <Minimize sx={{ fontSize: '1.2rem' }} />
-                                ) : (
-                                    <Maximize sx={{ fontSize: '1.2rem' }} />
-                                )}
-                            </IconButton>
-                        </Tooltip>
-                    </Stack>
                     <Box
                         sx={{
                             height: height - TABS_HEIGHT,

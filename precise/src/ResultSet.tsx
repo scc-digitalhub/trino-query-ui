@@ -2,6 +2,7 @@ import React from 'react'
 import {
     Alert,
     Box,
+    Button,
     CircularProgress,
     LinearProgress,
     Link,
@@ -14,11 +15,15 @@ import {
     TableFooter,
     TableHead,
     TableRow,
+    Tooltip,
     Typography,
 } from '@mui/material'
+import { alpha } from '@mui/material/styles'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import Chip from '@mui/material/Chip'
 import type { ChipProps } from '@mui/material/Chip'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import StopIcon from '@mui/icons-material/Stop'
 import ReactDOMServer from 'react-dom/server'
 import CopyLink from './utils/CopyLink'
 import ClearButton from './utils/ClearButton'
@@ -33,6 +38,8 @@ interface ResultSetProps {
     errorMessage: string
     truncationMessage?: string
     onClearResults: (queryId: string | undefined) => void
+    onExecute?: () => void
+    isQueryRunning?: boolean
 }
 
 class ResultSet extends React.Component<ResultSetProps> {
@@ -400,36 +407,72 @@ class ResultSet extends React.Component<ResultSetProps> {
         }
 
         // Ensure the 'result-set' class is applied to the container
+        const showResultActions =
+            !!(response && response.id) &&
+            !!(columns && columns.length) &&
+            !!(response.stats && this.isFinishedFailedOrCancelled(response.stats.state))
         return (
-            <Box>
-                {response && response.id ? (
-                    <Box display="flex" alignItems="center" gap={1} fontSize="0.8rem" sx={{ p: 1 }}>
-                        {errorMessage ? (
-                            <Alert severity="error" sx={{ py: 0 }}>
-                                {errorMessage}
-                            </Alert>
-                        ) : null}
-                        {truncationMessage ? (
-                            <Alert severity="warning" sx={{ py: 0 }}>
-                                {truncationMessage}
-                            </Alert>
-                        ) : null}
-                        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', height: height, minHeight: 0, overflow: 'hidden' }}>
+                <Box sx={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 1, fontSize: '0.8rem', p: 1 }}>
+                    {this.props.onExecute ? (
+                        <Tooltip title={!this.props.isQueryRunning ? 'Run Query (Ctrl + Enter)' : 'Stop Query'}>
+                            <Button
+                                variant="contained"
+                                color={!this.props.isQueryRunning ? 'primary' : 'error'}
+                                size="small"
+                                onClick={this.props.onExecute}
+                                startIcon={
+                                    !this.props.isQueryRunning ? (
+                                        <PlayArrowIcon sx={{ fontSize: '1.1rem' }} />
+                                    ) : (
+                                        <StopIcon sx={{ fontSize: '1.1rem' }} />
+                                    )
+                                }
+                                sx={(theme) => ({
+                                    px: 2,
+                                    py: 0.5,
+                                    fontWeight: 600,
+                                    borderRadius: `${theme.shape.borderRadius}px`,
+                                    textTransform: 'none',
+                                    boxShadow: !this.props.isQueryRunning
+                                        ? `0px 2px 4px ${alpha(theme.palette.primary.main, 0.25)}`
+                                        : 'none',
+                                    '&:hover': {
+                                        boxShadow: !this.props.isQueryRunning
+                                            ? `0px 4px 8px ${alpha(theme.palette.primary.main, 0.35)}`
+                                            : 'none',
+                                    },
+                                })}
+                            >
+                                {!this.props.isQueryRunning ? 'Run Query' : 'Stop'}
+                            </Button>
+                        </Tooltip>
+                    ) : null}
+                    {errorMessage ? (
+                        <Alert severity="error" sx={{ py: 0 }}>
+                            {errorMessage}
+                        </Alert>
+                    ) : null}
+                    {truncationMessage ? (
+                        <Alert severity="warning" sx={{ py: 0 }}>
+                            {truncationMessage}
+                        </Alert>
+                    ) : null}
+                    <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {response && response.id ? (
                             <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', whiteSpace: 'nowrap', mr: 0.5 }}>
                                 {this.getRowCount()} rows
                             </Typography>
-                            {columns && columns.length ? (
-                                response.stats && this.isFinishedFailedOrCancelled(response.stats.state) ? (
-                                    <>
-                                        <ClearButton onClear={() => this.props.onClearResults(queryId)} />
-                                        <CopyLink copy={() => this.copy()} />
-                                        <DownloadCsvButton download={() => this.downloadCsv()} />
-                                    </>
-                                ) : null
-                            ) : null}
-                        </Box>
+                        ) : null}
+                        {showResultActions ? (
+                            <>
+                                <ClearButton onClear={() => this.props.onClearResults(queryId)} />
+                                <CopyLink copy={() => this.copy()} />
+                                <DownloadCsvButton download={() => this.downloadCsv()} />
+                            </>
+                        ) : null}
                     </Box>
-                ) : null}
+                </Box>
                 {/* if the status is not finished, show spinner */}
                 {response &&
                 response.stats &&
@@ -473,13 +516,13 @@ class ResultSet extends React.Component<ResultSetProps> {
                                 {this.formatMillisAsHHMMSS(response.stats.elapsedTimeMillis)}
                             </Typography>
                         </Box>
-                        <Box>
+                        <Box sx={{ flexGrow: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                             {response.stats.rootStage && response.stats.rootStage.subStages ? (
                                 <TableContainer
                                     component={Paper}
                                     sx={{
-                                        // decrease the resultset size by the header size
-                                        height: height - 42,
+                                        flexGrow: 1,
+                                        minHeight: 0,
                                         overflowY: 'auto',
                                     }}
                                 >
@@ -676,7 +719,7 @@ class ResultSet extends React.Component<ResultSetProps> {
                         </Box>
                     </>
                 ) : columns && columns.length ? (
-                    <Box sx={{ position: 'relative', height: height - 42 }}>{this.renderTable(results, columns)}</Box>
+                    <Box sx={{ flexGrow: 1, minHeight: 0, position: 'relative', width: '100%' }}>{this.renderTable(results, columns)}</Box>
                 ) : null}
             </Box>
         )

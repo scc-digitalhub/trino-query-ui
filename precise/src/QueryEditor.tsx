@@ -32,6 +32,8 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
     flexGrow: 1,
     padding: theme.spacing(3),
     width: '100%',
+    maxWidth: '100%',
+    overflow: 'hidden',
     boxSizing: 'border-box',
     transition: theme.transitions.create(['margin', 'width'], {
         easing: theme.transitions.easing.sharp,
@@ -43,6 +45,7 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
             props: ({ open }) => open,
             style: {
                 width: `calc(100% - ${DRAWER_WIDTH}px)`,
+                maxWidth: `calc(100% - ${DRAWER_WIDTH}px)`,
                 marginLeft: `${DRAWER_WIDTH}px`,
                 transition: theme.transitions.create(['margin', 'width'], {
                     easing: theme.transitions.easing.easeOut,
