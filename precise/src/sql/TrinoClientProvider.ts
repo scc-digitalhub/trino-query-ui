@@ -9,7 +9,7 @@ export class TrinoClientProvider {
     private static baseUrl?: string
     private static requestHeaders: Record<string, string> = {}
 
-    private constructor() { }
+    private constructor() {}
 
     static configure(config: TrinoClientConfig) {
         if (config.baseUrl !== undefined) {

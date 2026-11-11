@@ -162,7 +162,11 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
     handleTabCreate = () => {
         const newQuery = this.props.queries.addQuery(false, 'New query')
         if (this.monacoRef) {
-            this.monacoRef.editor.createModel('', TRINO_SQL_LANGUAGE, this.monacoRef.Uri.parse(`file:///${newQuery.id}`))
+            this.monacoRef.editor.createModel(
+                '',
+                TRINO_SQL_LANGUAGE,
+                this.monacoRef.Uri.parse(`file:///${newQuery.id}`)
+            )
         }
         this.props.queries.setCurrentQuery(newQuery.id)
         return newQuery.id
@@ -285,7 +289,6 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
             currentWord += currentLine[i - 1]
             endWord = i
         }
-
 
         const inputStream = CharStream.fromString(newValue)
         const lexer = new SqlBaseLexer(inputStream)
@@ -554,14 +557,12 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
 
         //console.log("After table names, completion items:", completionItems.length);
         for (const statement of statements) {
-
             // if inside ColumnReferenceContext, we can use the table name to get the columns
             if (
                 (caretPosition.column >= statement.start.column && statement.start.line == caretPosition.lineNumber) ||
                 (caretPosition.column <= statement.end.column && statement.end.line == caretPosition.lineNumber) ||
                 (caretPosition.lineNumber > statement.start.line && caretPosition.lineNumber < statement.end.line)
             ) {
-
                 const tableName = statement.tableName
                 const parts = tableName.split('.')
                 let tableReference: TableReference | undefined
@@ -654,7 +655,6 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
             this.completionItems = completionItems
             this.lastCompletionItemsPosition = caretPosition
         }
-
     }
 
     cancelParsing() {
@@ -912,7 +912,15 @@ class QueryEditorPane extends React.Component<QueryEditorPaneProps, QueryEditorP
                             height={'100%'}
                             width={width}
                             language="trinosql"
-                            theme={(typeof this.props.theme === 'object' ? this.props.theme?.palette?.mode === 'dark' : this.props.theme === 'dark') ? 'vs-dark' : 'vs'}
+                            theme={
+                                (
+                                    typeof this.props.theme === 'object'
+                                        ? this.props.theme?.palette?.mode === 'dark'
+                                        : this.props.theme === 'dark'
+                                )
+                                    ? 'vs-dark'
+                                    : 'vs'
+                            }
                             value={currentQuery?.query || ''}
                             options={{
                                 automaticLayout: true,

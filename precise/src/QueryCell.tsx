@@ -237,7 +237,11 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
     }
 
     Execute() {
-        if (this.queryRunner.IsRunning() || (this.state.runningQuery !== undefined && (this.state.response?.stats?.state === 'RUNNING' || this.state.response?.stats?.state === 'QUEUED'))) {
+        if (
+            this.queryRunner.IsRunning() ||
+            (this.state.runningQuery !== undefined &&
+                (this.state.response?.stats?.state === 'RUNNING' || this.state.response?.stats?.state === 'QUEUED'))
+        ) {
             this.queryRunner.CancelQuery('Query was cancelled')
             this.setState({ runningQuery: undefined })
             return
@@ -429,12 +433,16 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
                     </IconButton>
                     <IconButton
                         color="inherit"
-                        title={this.state.editorMaximized ? "Minimize editor" : "Maximize editor"}
+                        title={this.state.editorMaximized ? 'Minimize editor' : 'Maximize editor'}
                         onClick={this.toggleEditorMaximize}
                     >
                         {this.state.editorMaximized ? <MinimizeIcon /> : <RemoveIcon />}
                     </IconButton>
-                    <IconButton color="inherit" title={this.state.editorCollapsed ? "Expand query" : "Collapse query"} onClick={this.toggleQueryCollapse}>
+                    <IconButton
+                        color="inherit"
+                        title={this.state.editorCollapsed ? 'Expand query' : 'Collapse query'}
+                        onClick={this.toggleQueryCollapse}
+                    >
                         {this.state.editorCollapsed ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                     </IconButton>
                 </Toolbar>
@@ -442,7 +450,7 @@ class QueryCell extends React.Component<QueryCellProps, QueryCellState> {
                 <Box sx={{ display: this.state.editorCollapsed ? 'none' : 'block' }}>
                     <QueryEditorPane
                         ref={this.editorPaneRef}
-                        onSelectChange={() => { }}
+                        onSelectChange={() => {}}
                         onExecute={() => this.Execute()}
                         isQueryRunning={isQueryRunning}
                         queries={this.props.queries}

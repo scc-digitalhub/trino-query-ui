@@ -345,7 +345,14 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                     }}
                                     label={
                                         <Box
-                                            style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', width: '100%', minWidth: 0 }}
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 8,
+                                                cursor: 'pointer',
+                                                width: '100%',
+                                                minWidth: 0,
+                                            }}
                                             onClick={(e) => {
                                                 e.stopPropagation()
                                                 handleToggle(catalogPath)
@@ -356,7 +363,12 @@ const CatalogViewer: React.FC<CatalogViewerProps> = ({
                                         >
                                             <Typography
                                                 fontSize="small"
-                                                sx={{ flex: 1, minWidth: 0, wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                                                sx={{
+                                                    flex: 1,
+                                                    minWidth: 0,
+                                                    wordBreak: 'break-word',
+                                                    overflowWrap: 'anywhere',
+                                                }}
                                             >
                                                 {catalogName}
                                             </Typography>

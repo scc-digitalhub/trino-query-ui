@@ -5,16 +5,16 @@ class TrinoQueryRunner {
     private rowsRead: number = 0
     private isRunning: boolean = false
     private cancellationToken: string | null = null
-    SetResults = (_newResults: any[]) => { }
+    SetResults = (_newResults: any[]) => {}
     // make this return the TrinoQueryRunner object
-    private setAllResults = (_allResults: any[], _error: boolean) => { }
-    SetColumns = (newColumns: any[]) => { }
-    private setStatus = (newStatus: any) => { }
-    SetScanStats = (newScanStats: any) => { }
-    private setErrorMessage = (newErrorMessage: string) => { }
-    SetCancelling = () => { }
-    SetStopped = () => { }
-    SetStarted = () => { }
+    private setAllResults = (_allResults: any[], _error: boolean) => {}
+    SetColumns = (newColumns: any[]) => {}
+    private setStatus = (newStatus: any) => {}
+    SetScanStats = (newScanStats: any) => {}
+    private setErrorMessage = (newErrorMessage: string) => {}
+    SetCancelling = () => {}
+    SetStopped = () => {}
+    SetStarted = () => {}
     pages: any[] = []
     columns: any[] = []
     backoff_delay_msec = 0
@@ -24,7 +24,7 @@ class TrinoQueryRunner {
     // Add properties to store catalog and schema headers
     private trinoCatalog: string | null = null
     private trinoSchema: string | null = null
-    private setHeadersCallback: (catalog: string | null, schema: string | null) => void = () => { }
+    private setHeadersCallback: (catalog: string | null, schema: string | null) => void = () => {}
 
     // Base URL for API requests
     private baseUrl: string | null = null
@@ -40,7 +40,7 @@ class TrinoQueryRunner {
     // Hard cap for the number of rows in the cached result set.
     private static readonly MAX_ROWS = 10_000
 
-    private setTruncationMessage = (_msg: string) => { }
+    private setTruncationMessage = (_msg: string) => {}
     SetAllResultsCallback(setAllResults: (n: any[], error: boolean) => any): TrinoQueryRunner {
         this.setAllResults = setAllResults
         return this
@@ -385,7 +385,10 @@ class TrinoQueryRunner {
     }
 
     private handleFetchError(error: unknown) {
-        if (this.cancellationReason || (error instanceof Error && (error.name === 'AbortError' || error.message?.includes('aborted')))) {
+        if (
+            this.cancellationReason ||
+            (error instanceof Error && (error.name === 'AbortError' || error.message?.includes('aborted')))
+        ) {
             this.setErrorMessage(this.cancellationReason || 'Query was cancelled')
             return
         }

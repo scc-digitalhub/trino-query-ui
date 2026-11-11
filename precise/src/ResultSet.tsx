@@ -167,10 +167,7 @@ class ResultSet extends React.Component<ResultSetProps> {
                         height: '100%',
                         bgcolor: 'background.paper',
                         '& .MuiDataGrid-columnHeader, & .MuiDataGrid-filler': (theme) => {
-                            const tint = alpha(
-                                theme.palette.primary.main,
-                                theme.palette.mode === 'light' ? 0.05 : 0.12
-                            )
+                            const tint = alpha(theme.palette.primary.main, theme.palette.mode === 'light' ? 0.05 : 0.12)
                             return {
                                 backgroundColor: theme.palette.background.paper,
                                 backgroundImage: `linear-gradient(${tint}, ${tint})`,
@@ -322,9 +319,7 @@ class ResultSet extends React.Component<ResultSetProps> {
         }
 
         const header = columns.map((column: any) => escapeCell(column.name)).join(',')
-        const rows = results
-            .flat()
-            .map((row: any[]) => row.map((cell: any) => escapeCell(cell)).join(','))
+        const rows = results.flat().map((row: any[]) => row.map((cell: any) => escapeCell(cell)).join(','))
         return [header, ...rows].join('\n')
     }
 
@@ -473,7 +468,10 @@ class ResultSet extends React.Component<ResultSetProps> {
                     ) : null}
                     <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
                         {response && response.id ? (
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', whiteSpace: 'nowrap', mr: 0.5 }}>
+                            <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 600, color: 'text.secondary', whiteSpace: 'nowrap', mr: 0.5 }}
+                            >
                                 {this.getRowCount()} rows
                             </Typography>
                         ) : null}
@@ -529,7 +527,15 @@ class ResultSet extends React.Component<ResultSetProps> {
                                 {this.formatMillisAsHHMMSS(response.stats.elapsedTimeMillis)}
                             </Typography>
                         </Box>
-                        <Box sx={{ flexGrow: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                        <Box
+                            sx={{
+                                flexGrow: 1,
+                                minHeight: 0,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflow: 'hidden',
+                            }}
+                        >
                             {response.stats.rootStage && response.stats.rootStage.subStages ? (
                                 <TableContainer
                                     component={Paper}
@@ -732,7 +738,9 @@ class ResultSet extends React.Component<ResultSetProps> {
                         </Box>
                     </>
                 ) : columns && columns.length ? (
-                    <Box sx={{ flexGrow: 1, minHeight: 0, position: 'relative', width: '100%' }}>{this.renderTable(results, columns)}</Box>
+                    <Box sx={{ flexGrow: 1, minHeight: 0, position: 'relative', width: '100%' }}>
+                        {this.renderTable(results, columns)}
+                    </Box>
                 ) : null}
             </Box>
         )

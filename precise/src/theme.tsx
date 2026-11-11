@@ -18,19 +18,24 @@ export const createTrinoTheme = (options: ThemeOptions): Theme => {
             styleOverrides: {
                 root: {
                     '&.MuiTableCell-head': {
-                        backgroundColor: alpha(baseTheme.palette.primary.main, baseTheme.palette.mode === 'light' ? 0.05 : 0.12),
+                        backgroundColor: alpha(
+                            baseTheme.palette.primary.main,
+                            baseTheme.palette.mode === 'light' ? 0.05 : 0.12
+                        ),
                         fontWeight: 600,
                     },
                 },
             },
         },
-        ...(baseTheme.palette.mode === 'dark' ? {
-            MuiScopedCssBaseline: {
-                styleOverrides: {
-                    root: darkScrollbar(),
-                },
-            },
-        } : {}),
+        ...(baseTheme.palette.mode === 'dark'
+            ? {
+                  MuiScopedCssBaseline: {
+                      styleOverrides: {
+                          root: darkScrollbar(),
+                      },
+                  },
+              }
+            : {}),
     }
     return baseTheme
 }
@@ -46,4 +51,3 @@ export const darkTheme = createTrinoTheme({
         mode: 'dark',
     },
 })
-

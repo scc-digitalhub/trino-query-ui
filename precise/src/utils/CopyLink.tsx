@@ -23,13 +23,7 @@ const CopyLink: React.FC<CopyLinkProps> = ({ copy }) => {
                 color={copied ? 'success' : 'primary'}
                 size="small"
                 sx={(theme) => ({ borderRadius: `${theme.shape.borderRadius}px`, textTransform: 'none' })}
-                startIcon={
-                    copied ? (
-                        <DoneIcon fontSize="small" />
-                    ) : (
-                        <ContentCopyIcon fontSize="small" />
-                    )
-                }
+                startIcon={copied ? <DoneIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
                 onClick={handleCopy}
             >
                 {copied ? 'Copied!' : 'Copy'}

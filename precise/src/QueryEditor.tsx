@@ -100,7 +100,6 @@ export const QueryEditor = ({
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
     const containerRef = useRef(null)
 
-
     TrinoClientProvider.configure({
         baseUrl,
         requestHeaders,
@@ -220,8 +219,8 @@ export const QueryEditor = ({
                                     display: 'flex',
                                     flexDirection: 'column',
                                     overflow: 'hidden',
-                                }
-                            }
+                                },
+                            },
                         }}
                     >
                         <CatalogViewer

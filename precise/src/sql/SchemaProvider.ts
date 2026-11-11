@@ -28,7 +28,11 @@ class SchemaProvider {
                     if (schemaName === schemaFilter || !schemaFilter) {
                         for (const [tableName, table] of schema.getTables()) {
                             tableNames.push(
-                                quoteIdentifier(key) + '.' + quoteIdentifier(schemaName) + '.' + quoteIdentifier(tableName)
+                                quoteIdentifier(key) +
+                                    '.' +
+                                    quoteIdentifier(schemaName) +
+                                    '.' +
+                                    quoteIdentifier(tableName)
                             )
                         }
                     }
@@ -67,7 +71,7 @@ class SchemaProvider {
             return this.tables.get(tableRef.fullyQualified)
         }
         // async operation to refresh cache but return null in the meantime
-        SchemaProvider.getTableRefreshCache(tableRef, (table: Table) => { })
+        SchemaProvider.getTableRefreshCache(tableRef, (table: Table) => {})
         return null
     }
 
@@ -120,8 +124,8 @@ class SchemaProvider {
                         })
                         .StartQuery(
                             'SELECT table_schema, table_name, table_type FROM ' +
-                            quoteIdentifier(catalog.getName()) +
-                            '.information_schema.tables'
+                                quoteIdentifier(catalog.getName()) +
+                                '.information_schema.tables'
                         )
                 }
             })
@@ -279,7 +283,9 @@ class SchemaProvider {
                 resolveOnce(table)
             })
 
-        fallbackQuery.StartQuery(`DESCRIBE ${quoteIdentifier(tableRef.catalogName)}.${quoteIdentifier(tableRef.schemaName)}.${quoteIdentifier(tableRef.tableName)}`)
+        fallbackQuery.StartQuery(
+            `DESCRIBE ${quoteIdentifier(tableRef.catalogName)}.${quoteIdentifier(tableRef.schemaName)}.${quoteIdentifier(tableRef.tableName)}`
+        )
     }
 }
 
