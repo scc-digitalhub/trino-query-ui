@@ -160,9 +160,22 @@ class ResultSet extends React.Component<ResultSetProps> {
                     initialState={{
                         pagination: { paginationModel: { pageSize: 100, page: 0 } },
                     }}
+                    showCellVerticalBorder
+                    showColumnVerticalBorder
                     sx={{
                         width: '100%',
                         height: '100%',
+                        bgcolor: 'background.paper',
+                        '& .MuiDataGrid-columnHeader, & .MuiDataGrid-filler': (theme) => {
+                            const tint = alpha(
+                                theme.palette.primary.main,
+                                theme.palette.mode === 'light' ? 0.05 : 0.12
+                            )
+                            return {
+                                backgroundColor: theme.palette.background.paper,
+                                backgroundImage: `linear-gradient(${tint}, ${tint})`,
+                            }
+                        },
                         '& .MuiDataGrid-columnHeaderTitle': { fontWeight: 600 },
                     }}
                     getRowId={(row) => String(row['mui-row-id'])}
